@@ -30,23 +30,25 @@ def calculate_power(data):
     data['power(W)'] = data['force(N)'] * data['speed(m/s)']
     return data
 
-def plot_speed_time(data, title):
+def plot_speed_time(datasets, titles):
     plt.figure(figsize=(10, 6))
-    plt.plot(data['time(s)'], data['speed(m/s)'], label='Speed (m/s)')
+    for data, title in zip(datasets, titles):
+        plt.plot(data['time(s)'], data['speed(m/s)'], label=title)
     plt.xlabel('Time (s)')
     plt.ylabel('Speed (m/s)')
-    plt.title(title)
+    plt.title('Speed over Time')
     plt.legend()
     plt.grid(True)
     plt.gca().xaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f'{x:.2g}'))
     plt.show()
 
-def plot_speed_distance(data, title):
+def plot_speed_distance(datasets, titles):
     plt.figure(figsize=(10, 6))
-    plt.plot(data['position(m)'], data['speed(m/s)'], label='Speed (m/s)')
+    for data, title in zip(datasets, titles):
+        plt.plot(data['position(m)'], data['speed(m/s)'], label=title)
     plt.xlabel('Distance (m)')
     plt.ylabel('Speed (m/s)')
-    plt.title(title)
+    plt.title('Speed over Distance')
     plt.legend()
     plt.grid(True)
     plt.show()
@@ -88,31 +90,36 @@ def main():
     root = Tk()
     root.withdraw()  # Hide the root window
 
-    # Open a file dialog to select a file
-    file_path = filedialog.askopenfilename(
-        title="Select a CSV file",
+    # Open a file dialog to select multiple files
+    file_paths = filedialog.askopenfilenames(
+        title="Select CSV files",
         filetypes=(("CSV files", "*.csv"), ("All files", "*.*"))
     )
     
-    # If a file is selected, proceed with processing
-    if file_path:
+    datasets = []
+    titles = []
+    
+    # Process each selected file
+    for file_path in file_paths:
         data = load_data(file_path)
         filtered_data = filter_data(data)
         filtered_data = calculate_power(filtered_data)
         filtered_data = calculate_acceleration(filtered_data)
+        datasets.append(filtered_data)
+        titles.append(file_path.split('/')[-1])  # Use the file name as the title
 
-        # find_local_extrema(data, 'position(mm)', 'speed(mm/s)')
+    if datasets:
+        plot_speed_time(datasets, titles)
+        plot_speed_distance(datasets, titles)
         
-        plot_speed_time(filtered_data, 'Speed over Time')
-        plot_speed_distance(filtered_data, 'Speed over Distance')
-        
-        max_speed, max_speed_time, max_power, max_power_time, load = calculate_metrics(filtered_data)
-        print(f"File: {file_path}")
-        print(f"Max Speed: {max_speed} m/s at {max_speed_time} s")
-        print(f"Max Power: {max_power} W at {load} s") # load not working correctly
-        print()
+        for data, title in zip(datasets, titles):
+            max_speed, max_speed_time, max_power, max_power_time, load = calculate_metrics(data)
+            print(f"File: {title}")
+            print(f"Max Speed: {max_speed} m/s at {max_speed_time} s")
+            print(f"Max Power: {max_power} W at {load} s")  # load not working correctly
+            print()
     else:
-        print("No file selected.")
+        print("No files selected.")
 
 if __name__ == '__main__':
     main()
