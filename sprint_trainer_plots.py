@@ -27,7 +27,7 @@ def filter_data(data, speed_threshold=2, time_prior=0.5):
 def calculate_power(data):
     # Convert load to kilograms
     data['load(kg)'] = data['load(g)'] / 1000
-    data['power(W)'] = data['load(kg)'] * data['speed(m/s)']
+    data['power(W)'] = data['load(kg)'] * data['speed(m/s)'] * 9.81
     return data
 
 def plot_speed_time(datasets, titles):
@@ -40,7 +40,6 @@ def plot_speed_time(datasets, titles):
     plt.legend()
     plt.grid(True)
     plt.gca().xaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f'{x:.2g}'))
-    plt.show()
 
 def plot_speed_distance(datasets, titles):
     plt.figure(figsize=(10, 6))
@@ -51,7 +50,6 @@ def plot_speed_distance(datasets, titles):
     plt.title('Speed over Distance')
     plt.legend()
     plt.grid(True)
-    plt.show()
 
 def calculate_metrics(data):
     max_speed = data['speed(m/s)'].max()
@@ -83,7 +81,7 @@ def find_local_extrema(data, x_col, y_col):
     plt.xlabel(x_col)
     plt.ylabel(y_col)
     plt.legend()
-    plt.show()
+    plt.show()  # Changed to block execution until the plot is closed
 
 def main():
     # Create a Tkinter root window (it will remain hidden)
@@ -111,6 +109,7 @@ def main():
     if datasets:
         plot_speed_time(datasets, titles)
         plot_speed_distance(datasets, titles)
+        plt.show()  # Show all plots at once
         
         for data, title in zip(datasets, titles):
             max_speed, max_speed_time, max_power, max_power_time, load = calculate_metrics(data)
