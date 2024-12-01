@@ -25,9 +25,9 @@ def filter_data(data, speed_threshold=2, time_prior=0.5):
     return filtered_data
 
 def calculate_power(data):
-    # Convert load to Newtons and calculate power in Watts
-    data['force(N)'] = data['load(g)'] * 0.00981
-    data['power(W)'] = data['force(N)'] * data['speed(m/s)']
+    # Convert load to kilograms
+    data['load(kg)'] = data['load(g)'] / 1000
+    data['power(W)'] = data['load(kg)'] * data['speed(m/s)']
     return data
 
 def plot_speed_time(datasets, titles):
@@ -58,7 +58,7 @@ def calculate_metrics(data):
     max_speed_time = data['time(s)'][data['speed(m/s)'].idxmax()]
     max_power = data['power(W)'].max()
     max_power_time = data['time(s)'][data['power(W)'].idxmax()]
-    load = data['load(g)'] * 0.00981
+    load = data['load(kg)']
     return max_speed, max_speed_time, max_power, max_power_time, load
 
 def calculate_acceleration(data):
@@ -115,8 +115,9 @@ def main():
         for data, title in zip(datasets, titles):
             max_speed, max_speed_time, max_power, max_power_time, load = calculate_metrics(data)
             print(f"File: {title}")
-            print(f"Max Speed: {max_speed} m/s at {max_speed_time} s")
-            print(f"Max Power: {max_power} W at {load} s")  # load not working correctly
+            print(f"Max Speed: {max_speed:.2f} m/s at {max_speed_time:.2f} s")
+            print(f"Max Power: {max_power:.2f} W at {max_power_time:.2f} s")
+            print(f"Load: {load.mean():.2f} kg")  # Display average load in kg
             print()
     else:
         print("No files selected.")
